@@ -1,0 +1,16 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Welcome to Multivendor Clothing Store{% endblock %}
+
+{% block content %}
+    <h2>Welcome to our Multivendor Clothing Store!</h2>
+    <p>Find the latest fashion trends from various vendors all in one place.</p>
+    <h3>Featured Categories:</h3>
+    <ul>
+        <li>Men's Wear</li>
+        <li>Women's Wear</li>
+        <li>Kids' Clothing</li>
+        <li>Accessories</li>
+    </ul>
+    <a href="{% url 'product_list' %}">Browse all products</a>
+{% endblock %}
