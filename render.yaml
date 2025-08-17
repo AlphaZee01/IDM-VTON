@@ -1,0 +1,89 @@
+services:
+  # IDM-VTON Backend API
+  - type: web
+    name: idm-vton-api
+    env: python
+    plan: starter  # or performance for GPU support
+    buildCommand: |
+      pip install -r requirements-render.txt
+      mkdir -p data/cache data/results logs models
+    startCommand: |
+      uvicorn api.main:app --host 0.0.0.0 --port $PORT --workers 1
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: PORT
+        value: 8000
+      - key: HOST
+        value: 0.0.0.0
+      - key: DEBUG
+        value: false
+      - key: LOG_LEVEL
+        value: INFO
+      - key: DEVICE
+        value: cpu  # Render doesn't support GPU in starter plan
+      - key: CUDA_VISIBLE_DEVICES
+        value: ""
+      - key: MODEL_PATH
+        value: /opt/render/project/src/models
+      - key: CKPT_PATH
+        value: /opt/render/project/src/ckpt
+      - key: DATA_PATH
+        value: /opt/render/project/src/data
+      - key: HF_MODEL_NAME
+        value: yisol/IDM-VTON
+      - key: IMAGE_WIDTH
+        value: 768
+      - key: IMAGE_HEIGHT
+        value: 1024
+      - key: NUM_INFERENCE_STEPS
+        value: 30
+      - key: GUIDANCE_SCALE
+        value: 2.0
+      - key: BATCH_SIZE
+        value: 1
+      - key: MAX_CONCURRENT_REQUESTS
+        value: 3
+      - key: MAX_PROCESSING_TIME
+        value: 300
+      - key: MAX_MEMORY_USAGE
+        value: 4096
+      - key: REQUEST_TIMEOUT
+        value: 300
+      - key: REDIS_URL
+        fromService:
+          name: idm-vton-redis
+          type: redis
+          property: connectionString
+      - key: API_KEY_HEADER
+        value: X-API-Key
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: 30
+      - key: MAX_FILE_SIZE
+        value: 10485760
+      - key: ALLOWED_IMAGE_FORMATS
+        value: jpg,jpeg,png
+      - key: LOG_FORMAT
+        value: json
+      - key: ENABLE_METRICS
+        value: true
+      - key: METRICS_PORT
+        value: 9090
+      # Optional: Add your API key for authentication
+      # - key: API_KEY
+      #   value: your-secret-api-key-here
+    healthCheckPath: /health
+    autoDeploy: true
+    disk:
+      name: idm-vton-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 10
+
+  # Redis for caching and background tasks
+  - type: redis
+    name: idm-vton-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []  # Allow all IPs

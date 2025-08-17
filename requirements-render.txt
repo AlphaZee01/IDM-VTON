@@ -1,0 +1,64 @@
+# IDM-VTON Backend Requirements for Render (CPU-only)
+# Optimized for Render's infrastructure without GPU support
+
+# Core FastAPI and web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Image processing (CPU-optimized)
+Pillow==10.1.0
+opencv-python-headless==4.8.1.78  # Headless version for servers
+numpy==1.24.3
+
+# Machine learning (CPU-only)
+torch==2.1.1+cpu  # CPU-only PyTorch
+torchvision==0.16.1+cpu
+torchaudio==2.1.1+cpu
+--extra-index-url https://download.pytorch.org/whl/cpu
+
+# Hugging Face and transformers
+transformers==4.36.0
+diffusers==0.24.0
+accelerate==0.25.0
+safetensors==0.4.1
+
+# Background processing and caching
+celery==5.3.4
+redis==5.0.1
+kombu==5.3.4
+
+# Monitoring and logging
+structlog==23.2.0
+prometheus-client==0.19.0
+psutil==5.9.6
+
+# HTTP client for external API calls
+httpx==0.25.2
+aiofiles==23.2.1
+
+# Development and testing (optional for production)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+
+# Additional dependencies for IDM-VTON
+scipy==1.11.4
+scikit-image==0.21.0
+matplotlib==3.8.2
+tqdm==4.66.1
+
+# File handling and utilities
+python-dotenv==1.0.0
+pathlib2==2.3.7
+
+# Security and validation
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# CORS and middleware
+starlette==0.27.0
+
+# Optional: For better performance on CPU
+# numba==0.58.1  # Uncomment if needed for CPU optimization
