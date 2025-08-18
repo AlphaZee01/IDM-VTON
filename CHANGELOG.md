@@ -34,6 +34,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - API connection testing and error handling
   - Responsive design for desktop and mobile
   - Complete documentation in `FRONTEND_README.md`
+- **Integrated Frontend-Backend** - Live testing interface
+  - Moved frontend to `static/index.html` for serving from FastAPI
+  - Auto-detection of API URL for seamless integration
+  - Single deployment with both frontend and backend
+  - Updated render.yaml to include static file serving
 
 - **API Development (Phase 2 Complete)** - Full FastAPI application with services
   - FastAPI application with middleware, CORS, and error handling
