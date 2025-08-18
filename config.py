@@ -76,13 +76,13 @@ class Settings(BaseSettings):
     enable_metrics: bool = Field(default=True, env="ENABLE_METRICS")
     metrics_port: int = Field(default=9090, env="METRICS_PORT")
     
-    @validator("allowed_origins", mode="before")
+    @validator("allowed_origins", pre=True)
     def parse_allowed_origins(cls, v):
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
         return v
     
-    @validator("allowed_image_formats", mode="before")
+    @validator("allowed_image_formats", pre=True)
     def parse_allowed_image_formats(cls, v):
         if isinstance(v, str):
             return [fmt.strip().lower() for fmt in v.split(",")]
