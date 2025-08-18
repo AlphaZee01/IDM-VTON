@@ -1,0 +1,31 @@
+# Ultra-simple requirements for Render deployment
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+Pillow
+opencv-python-headless
+numpy
+torch
+torchvision
+--extra-index-url https://download.pytorch.org/whl/cpu
+transformers
+diffusers
+accelerate
+safetensors
+celery
+redis
+structlog
+prometheus-client
+psutil
+httpx
+aiofiles
+scipy
+scikit-image
+matplotlib
+tqdm
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
+starlette
