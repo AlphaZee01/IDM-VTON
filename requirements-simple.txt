@@ -9,6 +9,7 @@ opencv-python-headless
 numpy
 torch
 torchvision
+torchaudio
 --extra-index-url https://download.pytorch.org/whl/cpu
 transformers
 diffusers
@@ -29,3 +30,19 @@ python-dotenv
 python-jose[cryptography]
 passlib[bcrypt]
 starlette
+
+# Additional dependencies from original requirements
+einops
+bitsandbytes
+basicsr
+fvcore
+cloudpickle
+omegaconf
+pycocotools
+av
+onnxruntime
+torchtriton
+torchmetrics
+
+# Additional utilities
+packaging

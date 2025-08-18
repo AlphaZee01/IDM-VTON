@@ -55,34 +55,60 @@ class TryOnPipeline:
     
     async def _load_models(self):
         """Load all required models."""
-        # Import here to avoid circular imports
-        from transformers import (
-            CLIPImageProcessor,
-            CLIPVisionModelWithProjection,
-            CLIPTextModel,
-            CLIPTextModelWithProjection,
-            AutoTokenizer
-        )
-        from diffusers import DDPMScheduler, AutoencoderKL
-        from src.unet_hacked_garmnet import UNet2DConditionModel as UNet2DConditionModel_ref
-        from src.unet_hacked_tryon import UNet2DConditionModel
-        from src.tryon_pipeline import StableDiffusionXLInpaintPipeline as TryonPipeline
-        from preprocess.humanparsing.run_parsing import Parsing
-        from preprocess.openpose.run_openpose import OpenPose
+        try:
+            # Import here to avoid circular imports
+            from transformers import (
+                CLIPImageProcessor,
+                CLIPVisionModelWithProjection,
+                CLIPTextModel,
+                CLIPTextModelWithProjection,
+                AutoTokenizer
+            )
+            from diffusers import DDPMScheduler, AutoencoderKL
+            
+            # Try to import custom modules with fallback
+            try:
+                from src.unet_hacked_garmnet import UNet2DConditionModel as UNet2DConditionModel_ref
+                from src.unet_hacked_tryon import UNet2DConditionModel
+                from src.tryon_pipeline import StableDiffusionXLInpaintPipeline as TryonPipeline
+            except ImportError as e:
+                logger.warning(f"Custom model modules not available: {e}")
+                logger.info("Using fallback model loading")
+                # Fallback to standard diffusers models
+                from diffusers import UNet2DConditionModel, UNet2DConditionModel as UNet2DConditionModel_ref
+                from diffusers import StableDiffusionXLInpaintPipeline as TryonPipeline
+            
+            try:
+                from preprocess.humanparsing.run_parsing import Parsing
+            except ImportError:
+                logger.warning("Human parsing module not available")
+                Parsing = None
+                
+            try:
+                from preprocess.openpose.run_openpose import OpenPose
+            except ImportError:
+                logger.warning("OpenPose module not available")
+                OpenPose = None
+        
+        except ImportError as e:
+            logger.error(f"Failed to import required modules: {e}")
+            raise ImportError(f"Missing required dependencies: {e}")
         
         logger.info("Loading TryOn models")
         
-        # Load main model components
+        # Load main model components with CPU fallback
+        torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+        
         self._models['unet'] = UNet2DConditionModel.from_pretrained(
             self.base_path,
             subfolder="unet",
-            torch_dtype=torch.float16,
+            torch_dtype=torch_dtype,
         )
         
         self._models['unet_encoder'] = UNet2DConditionModel_ref.from_pretrained(
             self.base_path,
             subfolder="unet_encoder",
-            torch_dtype=torch.float16,
+            torch_dtype=torch_dtype,
         )
         
         # Load tokenizers
@@ -104,13 +130,13 @@ class TryOnPipeline:
         self._models['text_encoder_one'] = CLIPTextModel.from_pretrained(
             self.base_path,
             subfolder="text_encoder",
-            torch_dtype=torch.float16,
+            torch_dtype=torch_dtype,
         )
         
         self._models['text_encoder_two'] = CLIPTextModelWithProjection.from_pretrained(
             self.base_path,
             subfolder="text_encoder_2",
-            torch_dtype=torch.float16,
+            torch_dtype=torch_dtype,
         )
         
         # Load image encoder
