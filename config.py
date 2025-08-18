@@ -6,7 +6,8 @@ Uses Pydantic settings for environment-based configuration.
 import os
 from pathlib import Path
 from typing import Optional, List
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -75,13 +76,13 @@ class Settings(BaseSettings):
     enable_metrics: bool = Field(default=True, env="ENABLE_METRICS")
     metrics_port: int = Field(default=9090, env="METRICS_PORT")
     
-    @validator("allowed_origins", pre=True)
+    @validator("allowed_origins", mode="before")
     def parse_allowed_origins(cls, v):
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
         return v
     
-    @validator("allowed_image_formats", pre=True)
+    @validator("allowed_image_formats", mode="before")
     def parse_allowed_image_formats(cls, v):
         if isinstance(v, str):
             return [fmt.strip().lower() for fmt in v.split(",")]
@@ -94,10 +95,11 @@ class Settings(BaseSettings):
             raise ValueError(f"Log level must be one of {valid_levels}")
         return v.upper()
     
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False
+    }
 
 
 # Global settings instance
