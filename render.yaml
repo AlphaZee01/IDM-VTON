@@ -6,7 +6,7 @@ services:
     plan: starter  # or performance for GPU support
     buildCommand: |
       pip install -r requirements-render.txt
-      mkdir -p data/cache data/results logs models
+      mkdir -p data/cache data/results logs models static
     startCommand: |
       uvicorn api.main:app --host 0.0.0.0 --port $PORT --workers 1
     envVars:

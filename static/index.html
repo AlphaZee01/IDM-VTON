@@ -263,10 +263,10 @@
             <!-- API Configuration -->
             <div class="api-config">
                 <h3>🔧 API Configuration</h3>
-                <div class="input-group">
-                    <label for="apiUrl">API Base URL:</label>
-                    <input type="url" id="apiUrl" placeholder="https://your-app.onrender.com" value="https://your-app.onrender.com">
-                </div>
+                                 <div class="input-group">
+                     <label for="apiUrl">API Base URL:</label>
+                     <input type="url" id="apiUrl" placeholder="https://your-app.onrender.com" value="">
+                 </div>
                 <div class="input-group">
                     <label for="apiKey">API Key (optional):</label>
                     <input type="text" id="apiKey" placeholder="Leave empty if no authentication required">
@@ -322,10 +322,14 @@
         let currentTaskId = null;
         let pollingInterval = null;
 
-        // Initialize drag and drop
-        document.addEventListener('DOMContentLoaded', function() {
-            setupDragAndDrop();
-        });
+                 // Initialize drag and drop
+         document.addEventListener('DOMContentLoaded', function() {
+             setupDragAndDrop();
+             
+             // Auto-detect API URL
+             const currentUrl = window.location.origin;
+             document.getElementById('apiUrl').value = currentUrl;
+         });
 
         function setupDragAndDrop() {
             const uploadAreas = document.querySelectorAll('.upload-area');

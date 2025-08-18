@@ -10,13 +10,16 @@ from typing import Dict, Any
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import structlog
+import psutil
 
 from config import get_settings, settings
 from api.routes import router as api_router
 from api.middleware import RequestLoggingMiddleware, MetricsMiddleware
-
+from core.exceptions import IDMVTONError
+from services.model_service import model_service
 
 # Configure structured logging
 structlog.configure(
@@ -46,8 +49,13 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting IDM-VTON API server", version=settings.app_version)
     
-    # Initialize services here if needed
-    # await initialize_services()
+    try:
+        # Initialize model service
+        await model_service.initialize()
+        logger.info("Model service initialized successfully")
+    except Exception as e:
+        logger.error("Failed to initialize model service", error=str(e))
+        raise
     
     yield
     
@@ -85,6 +93,10 @@ def create_app() -> FastAPI:
     # Add exception handlers
     app.add_exception_handler(Exception, global_exception_handler)
     app.add_exception_handler(HTTPException, http_exception_handler)
+    app.add_exception_handler(IDMVTONError, idmvton_exception_handler)
+    
+    # Mount static files for the frontend
+    app.mount("/static", StaticFiles(directory="static"), name="static")
     
     # Include routers
     app.include_router(api_router, prefix="/api/v1")
@@ -133,29 +145,82 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
     )
 
 
+async def idmvton_exception_handler(request: Request, exc: IDMVTONError) -> JSONResponse:
+    """IDM-VTON specific exception handler."""
+    logger.error("IDM-VTON error", error=str(exc), path=request.url.path)
+    return JSONResponse(
+        status_code=400,
+        content={
+            "error": True,
+            "message": str(exc),
+            "error_code": getattr(exc, 'error_code', 'UNKNOWN_ERROR'),
+            "details": getattr(exc, 'details', {})
+        }
+    )
+
+
 # Create app instance
 app = create_app()
 
 
+# Health check endpoint
 @app.get("/health")
-async def health_check() -> Dict[str, Any]:
-    """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "timestamp": time.time(),
-        "version": settings.app_version,
-        "service": settings.app_name
-    }
+async def health_check():
+    """Health check endpoint for monitoring."""
+    try:
+        # Check system resources
+        memory_usage = psutil.virtual_memory().percent
+        cpu_usage = psutil.cpu_percent(interval=1)
+        
+        # Check model service status
+        model_status = await model_service.get_status()
+        
+        return {
+            "status": "healthy",
+            "timestamp": time.time(),
+            "version": settings.app_version,
+            "system": {
+                "memory_usage_percent": memory_usage,
+                "cpu_usage_percent": cpu_usage
+            },
+            "model": model_status
+        }
+    except Exception as e:
+        logger.error("Health check failed", error=str(e))
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": time.time()
+        }
 
 
+# Root endpoint - serve the frontend
 @app.get("/")
-async def root() -> Dict[str, Any]:
-    """Root endpoint."""
+async def root():
+    """Serve the main frontend page."""
+    return FileResponse("static/index.html")
+
+
+# API status endpoint
+@app.get("/api/status")
+async def api_status():
+    """API status and information."""
     return {
-        "message": f"Welcome to {settings.app_name} API",
+        "api": "IDM-VTON Virtual Try-On API",
         "version": settings.app_version,
-        "docs": "/docs" if settings.debug else None,
-        "health": "/health"
+        "status": "running",
+        "endpoints": {
+            "health": "/health",
+            "api_docs": "/docs" if settings.debug else "disabled",
+            "tryon": "/api/v1/tryon",
+            "status": "/api/v1/status"
+        },
+        "features": [
+            "Virtual try-on with person and garment images",
+            "Asynchronous processing with task queue",
+            "Real-time progress tracking",
+            "Result caching and optimization"
+        ]
     }
 
 
