@@ -29,9 +29,9 @@ class Settings(BaseSettings):
     device: str = Field(default="cuda:0", env="DEVICE")
     
     # Model paths
-    model_path: str = Field(default="/app/models", env="MODEL_PATH")
-    ckpt_path: str = Field(default="/app/ckpt", env="CKPT_PATH")
-    data_path: str = Field(default="/app/data", env="DATA_PATH")
+    model_path: str = Field(default="./models", env="MODEL_PATH")
+    ckpt_path: str = Field(default="./ckpt", env="CKPT_PATH")
+    data_path: str = Field(default="./data", env="DATA_PATH")
     
     # Hugging Face model
     hf_model_name: str = Field(default="yisol/IDM-VTON", env="HF_MODEL_NAME")
@@ -122,8 +122,13 @@ def validate_paths():
     for path in paths_to_check:
         path_obj = Path(path)
         if not path_obj.exists():
-            path_obj.mkdir(parents=True, exist_ok=True)
-            print(f"Created directory: {path}")
+            try:
+                path_obj.mkdir(parents=True, exist_ok=True)
+                print(f"Created directory: {path}")
+            except PermissionError:
+                print(f"Warning: Could not create directory {path} due to permissions. Using current directory.")
+                # Use current directory as fallback
+                return True
     
     return True
 
