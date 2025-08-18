@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDM-VTON Test Frontend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .api-config {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .api-config h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 3px dashed #ddd;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #fafafa;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background: #e8f2ff;
+        }
+
+        .upload-area h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .upload-area p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 0 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .progress-section {
+            display: none;
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .result-section {
+            display: none;
+            text-align: center;
+        }
+
+        .result-image {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #bee5eb;
+        }
+
+        .download-btn {
+            background: #28a745;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .upload-section {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧥 IDM-VTON Test Frontend</h1>
+            <p>Test your virtual try-on API directly</p>
+        </div>
+
+        <div class="content">
+            <!-- API Configuration -->
+            <div class="api-config">
+                <h3>🔧 API Configuration</h3>
+                <div class="input-group">
+                    <label for="apiUrl">API Base URL:</label>
+                    <input type="url" id="apiUrl" placeholder="https://your-app.onrender.com" value="https://your-app.onrender.com">
+                </div>
+                <div class="input-group">
+                    <label for="apiKey">API Key (optional):</label>
+                    <input type="text" id="apiKey" placeholder="Leave empty if no authentication required">
+                </div>
+                <button class="btn" onclick="testConnection()">Test Connection</button>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="upload-section">
+                <div class="upload-area" onclick="document.getElementById('personImage').click()">
+                    <h3>👤 Person Image</h3>
+                    <p>Click to upload or drag & drop</p>
+                    <input type="file" id="personImage" accept="image/*" onchange="previewImage(this, 'personPreview')">
+                    <img id="personPreview" class="preview-image" alt="Person preview">
+                </div>
+
+                <div class="upload-area" onclick="document.getElementById('garmentImage').click()">
+                    <h3>👕 Garment Image</h3>
+                    <p>Click to upload or drag & drop</p>
+                    <input type="file" id="garmentImage" accept="image/*" onchange="previewImage(this, 'garmentPreview')">
+                    <img id="garmentPreview" class="preview-image" alt="Garment preview">
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls">
+                <button class="btn" onclick="startTryOn()" id="tryOnBtn">🚀 Start Try-On</button>
+                <button class="btn btn-secondary" onclick="resetForm()">🔄 Reset</button>
+            </div>
+
+            <!-- Progress Section -->
+            <div class="progress-section" id="progressSection">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Initializing...</div>
+            </div>
+
+            <!-- Messages -->
+            <div id="messages"></div>
+
+            <!-- Result Section -->
+            <div class="result-section" id="resultSection">
+                <h3>✨ Try-On Result</h3>
+                <img id="resultImage" class="result-image" alt="Try-on result">
+                <br>
+                <button class="btn download-btn" onclick="downloadResult()">📥 Download Result</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTaskId = null;
+        let pollingInterval = null;
+
+        // Initialize drag and drop
+        document.addEventListener('DOMContentLoaded', function() {
+            setupDragAndDrop();
+        });
+
+        function setupDragAndDrop() {
+            const uploadAreas = document.querySelectorAll('.upload-area');
+            
+            uploadAreas.forEach(area => {
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.classList.add('dragover');
+                });
+
+                area.addEventListener('dragleave', () => {
+                    area.classList.remove('dragover');
+                });
+
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('dragover');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const input = area.querySelector('input[type="file"]');
+                        input.files = files;
+                        input.dispatchEvent(new Event('change'));
+                    }
+                });
+            });
+        }
+
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const file = input.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        async function testConnection() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiUrl) {
+                showMessage('Please enter API URL', 'error');
+                return;
+            }
+
+            try {
+                const headers = {};
+                if (apiKey) {
+                    headers['X-API-Key'] = apiKey;
+                }
+
+                const response = await fetch(`${apiUrl}/health`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage(`✅ Connection successful! Status: ${data.status}`, 'success');
+                } else {
+                    showMessage(`❌ Connection failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                showMessage(`❌ Connection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function startTryOn() {
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const personFile = document.getElementById('personImage').files[0];
+            const garmentFile = document.getElementById('garmentImage').files[0];
+
+            // Validation
+            if (!apiUrl) {
+                showMessage('Please enter API URL', 'error');
+                return;
+            }
+
+            if (!personFile) {
+                showMessage('Please upload a person image', 'error');
+                return;
+            }
+
+            if (!garmentFile) {
+                showMessage('Please upload a garment image', 'error');
+                return;
+            }
+
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('person_image', personFile);
+            formData.append('garment_image', garmentFile);
+
+            // Prepare headers
+            const headers = {};
+            if (apiKey) {
+                headers['X-API-Key'] = apiKey;
+            }
+
+            try {
+                // Disable button and show progress
+                document.getElementById('tryOnBtn').disabled = true;
+                document.getElementById('progressSection').style.display = 'block';
+                updateProgress(10, 'Submitting try-on request...');
+
+                // Submit the task
+                const response = await fetch(`${apiUrl}/api/v1/tryon`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+                currentTaskId = result.task_id;
+                
+                updateProgress(20, 'Task submitted, starting processing...');
+                showMessage(`✅ Task submitted! Task ID: ${currentTaskId}`, 'success');
+
+                // Start polling for status
+                pollTaskStatus();
+
+            } catch (error) {
+                showMessage(`❌ Error starting try-on: ${error.message}`, 'error');
+                resetProgress();
+            }
+        }
+
+        async function pollTaskStatus() {
+            if (!currentTaskId) return;
+
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            const headers = {};
+            if (apiKey) {
+                headers['X-API-Key'] = apiKey;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/api/v1/tryon/${currentTaskId}`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const status = await response.json();
+                
+                switch (status.status) {
+                    case 'pending':
+                        updateProgress(30, 'Processing...');
+                        setTimeout(pollTaskStatus, 2000);
+                        break;
+                    
+                    case 'processing':
+                        updateProgress(50, 'Generating try-on result...');
+                        setTimeout(pollTaskStatus, 2000);
+                        break;
+                    
+                    case 'completed':
+                        updateProgress(90, 'Finalizing result...');
+                        await downloadResult();
+                        updateProgress(100, 'Complete!');
+                        showMessage('✅ Try-on completed successfully!', 'success');
+                        break;
+                    
+                    case 'failed':
+                        showMessage(`❌ Try-on failed: ${status.error || 'Unknown error'}`, 'error');
+                        resetProgress();
+                        break;
+                    
+                    default:
+                        updateProgress(40, 'Processing...');
+                        setTimeout(pollTaskStatus, 2000);
+                        break;
+                }
+
+            } catch (error) {
+                showMessage(`❌ Error checking status: ${error.message}`, 'error');
+                resetProgress();
+            }
+        }
+
+        async function downloadResult() {
+            if (!currentTaskId) return;
+
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            const headers = {};
+            if (apiKey) {
+                headers['X-API-Key'] = apiKey;
+            }
+
+            try {
+                const response = await fetch(`${apiUrl}/api/v1/tryon/${currentTaskId}/result`, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const imageUrl = URL.createObjectURL(blob);
+                
+                // Display result
+                const resultImage = document.getElementById('resultImage');
+                resultImage.src = imageUrl;
+                document.getElementById('resultSection').style.display = 'block';
+                
+                // Scroll to result
+                resultImage.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                showMessage(`❌ Error downloading result: ${error.message}`, 'error');
+            }
+        }
+
+        function updateProgress(percentage, text) {
+            document.getElementById('progressFill').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = text;
+        }
+
+        function resetProgress() {
+            document.getElementById('progressSection').style.display = 'none';
+            document.getElementById('tryOnBtn').disabled = false;
+            updateProgress(0, '');
+        }
+
+        function resetForm() {
+            // Clear file inputs
+            document.getElementById('personImage').value = '';
+            document.getElementById('garmentImage').value = '';
+            
+            // Clear previews
+            document.getElementById('personPreview').style.display = 'none';
+            document.getElementById('garmentPreview').style.display = 'none';
+            
+            // Clear result
+            document.getElementById('resultSection').style.display = 'none';
+            
+            // Reset progress
+            resetProgress();
+            
+            // Clear messages
+            document.getElementById('messages').innerHTML = '';
+            
+            // Clear task
+            currentTaskId = null;
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+
+        function showMessage(message, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.parentNode.removeChild(messageDiv);
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
